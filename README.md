@@ -1,6 +1,8 @@
-This is a reinforcement learning benchmarking platform I built to study how well RL algorithms generalize and how different reward structures affect learning in Atari Breakout. I needed a way to create tons of Breakout variations and test algorithms under controlled conditions for a research paper.
-Since this work is part of a collaborative paper currently under review, I'm not releasing the code. Instead, this document explains how everything works so others can understand the methodology.
+# Reinforcement Learning Sandbox for Atari Breakout
 
+
+This is a reinforcement learning benchmarking platform I built to study how well RL algorithms generalize and how different reward structures affect learning in Atari Breakout. I needed a way to create tons of Breakout variations and test algorithms under controlled conditions for a research paper.
+Since this work is part of a collaborative paper currently under review, the code is not publicly available. This document explains how everything works so others can understand the methodology and to showcase my work.
 
 ---
 
