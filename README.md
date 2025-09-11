@@ -32,7 +32,12 @@ The core is an Environment Generator that tweaks Breakout's rules using NumPy an
 
 ## Workflow
 
-Everything is defined by JSON specs that describe brick configs, ball velocity, paddle friction, and reward components. I sample from these to create 20+ environment families. Every environment uses deterministic seeding unless you explicitly enable stochastic wrappers. I kept network architectures separate from training logic. Rainbow DQN gets NoisyNets, multi-step returns, and distributional outputs. PPO and A2C use shared actor-critic networks with GAE and clipped objectives. Hyperparameters are mostly fixed except when Optuna is tuning them. Built for speed with SumTree-based prioritized sampling. N-step returns get computed at insertion time so sampling stays fast.Single-trial mode for debugging, distributed mode for serious experiments. Off-policy algorithms use centralized replay with async actor-learners. On-policy ones collect rollouts and do mini-batch SGD. Everything logs to W&B continuously.
+Everything is defined by JSON specs that describe brick configs, ball velocity, paddle friction, and reward components. I sample from these to create 20+ environment families. Every environment uses deterministic seeding unless you explicitly enable stochastic wrappers. I kept network architectures separate from training logic. 
+
+Rainbow DQN gets NoisyNets, multi-step returns, and distributional outputs. 
+PPO and A2C use shared actor-critic networks with GAE and clipped objectives. Hyperparameters are mostly fixed except when Optuna is tuning them. Built for speed with SumTree-based prioritized sampling. 
+
+N-step returns get computed at insertion time so sampling stays fast.Single-trial mode for debugging, distributed mode for serious experiments. Off-policy algorithms use centralized replay with async actor-learners. On-policy ones collect rollouts and do mini-batch SGD. Everything logs to W&B continuously.
 
 Each experiment starts with a JSON spec defining the environment, observation wrappers, algorithm, and hyperparameters (or Optuna study config). The orchestrator validates this, creates a W&B run, and if it's distributed, tells Nebius to spin up N worker containers. Workers build environments from the spec with deterministic seeding. For off-policy algorithms, actors push transitions to centralized replay while learners sample batches and update networks. For on-policy, they collect rollouts, compute advantages with GAE, and do several epochs of local SGD. Checkpoints save every N steps and upload to S3. When training finishes, the evaluation harness runs deterministic rollouts on held-out seeds and environment variants, computing aggregate stats and saving detailed traces.
 
