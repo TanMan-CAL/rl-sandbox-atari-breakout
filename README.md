@@ -21,14 +21,13 @@ The stack includes **PyTorch** for policies, **Gymnasium** for environments, **D
 ## Architecture
 <img width="1536" height="1024" alt="RL Sandbox Overview" src="https://github.com/user-attachments/assets/d8910da3-1c15-4773-b28f-2a8bcddb481b" />
 
+The project is built around an Environment Generator that modifies Breakout’s rules using NumPy while wrapping everything in Gymnasium’s interface. This allows control over brick layouts, ball friction, reward functions, and more. On top of that sit Observation Wrappers that manipulate what the agent perceives—grayscale conversion, random occlusions, frame skipping, and low-resolution encoders—separating visual difficulty from game mechanics.
 
-The core is an Environment Generator that tweaks Breakout's rules using NumPy and wraps everything in Gymnasium's interface. I can change brick layouts, ball friction, reward functions, whatever. On top of that are Observation Wrappers that mess with what the agent sees—grayscale conversion, random occlusions, frame skipping, low-res encoders. This lets me separate visual difficulty from game mechanics. The Agent code implements PPO, A2C, and Rainbow DQN in PyTorch. All algorithms inherit from the same base class so the benchmarking system treats them uniformly. There's a Prioritized Replay Buffer with a SumTree that handles n-step returns and importance sampling. The Trainer is where research meets infrastructure. It spins up Docker containers, talks to Nebius for GPU provisioning, starts W&B runs, and coordinates Optuna workers for hyperparameter search. Everything gets checkpointed to S3. Finally, there's an Evaluation Harness that runs deterministic rollouts and spits out the CSVs and plots for analysis.
+Implements RL variants of agents, PPO, A2C, Rainbow DQN, in PyTorch, all inheriting from a shared base class for uniform benchmarking. Off-policy algorithms leverage a Prioritized Replay Buffer with a SumTree structure for efficient n-step returns and importance sampling.
 
- Uses NumPy to tweak Breakout’s rules, including brick layouts, ball friction, reward functions, and more. All environments wrap Gymnasium’s interface for compatibility.  
-- Modify what the agent perceives, including grayscale conversion, random occlusions, frame skipping, and low-resolution encoders. This separates visual difficulty from game mechanics.  
-- Includes variants of **PPO**, **A2C**, and **Rainbow DQN** implemented in PyTorch. All agents inherit from a common base class, allowing uniform benchmarking. Off-policy agents utilize a **Prioritized Replay Buffer** with SumTree structure for efficient n-step returns and importance sampling.  
-- Coordinates Docker containers, GPU provisioning via Nebius, W&B runs, and Optuna hyperparameter search. Checkpoints are saved to S3.  
-- Runs deterministic rollouts on held-out environment seeds and computes aggregate statistics and detailed traces for analysis.
+Training infrastructure coordinates Docker containers, GPU provisioning via Nebius, experiment tracking with Weights & Biases, and Optuna-driven hyperparameter search. All models are checkpointed to S3.
+
+An Evaluation Harness executes deterministic rollouts on held-out seeds, producing aggregate statistics and CSV logs.
 
 ---
 
@@ -41,7 +40,7 @@ PPO and A2C use shared actor-critic networks with GAE and clipped objectives. Hy
 
 N-step returns get computed at insertion time so sampling stays fast.Single-trial mode for debugging, distributed mode for serious experiments. Off-policy algorithms use centralized replay with async actor-learners. On-policy ones collect rollouts and do mini-batch SGD. Everything logs to W&B continuously.
 
-Each experiment starts with a JSON spec defining the environment, observation wrappers, algorithm, and hyperparameters (or Optuna study config). The orchestrator validates this, creates a W&B run, and if it's distributed, tells Nebius to spin up N worker containers. Workers build environments from the spec with deterministic seeding. For off-policy algorithms, actors push transitions to centralized replay while learners sample batches and update networks. For on-policy, they collect rollouts, compute advantages with GAE, and do several epochs of local SGD. Checkpoints save every N steps and upload to S3. When training finishes, the evaluation harness runs deterministic rollouts on held-out seeds and environment variants, computing aggregate stats and saving detailed traces.
+Each experiment starts with a JSON spec defining the environment, observation wrappers, algorithm, and hyperparameters (or Optuna study config). The orchestrator validates this, creates a W&B run, and if it's distributed, tells Nebius to spin up N worker containers. Workers build environments from the spec with deterministic seeding. For off-policy algorithms, actors push transitions to centralized replay while learners sample batches and update networks. For on-policy, they collect rollouts, compute advantages with GAE, and do several epochs of local SGD. Checkpoints save every N steps and upload to S3. When training finishes, the evaluation harness runs deterministic rollouts on held-out seeds and environment variants.
 
 ---
 
