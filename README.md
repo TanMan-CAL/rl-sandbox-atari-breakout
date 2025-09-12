@@ -12,7 +12,7 @@ The goal of this project was to create a system capable of:
 
 - Programmatically generating different Breakout environments (e.g., sparse vs. dense rewards, noisy paddle controls, altered ball physics, visual occlusions).  
 - Running large-scale hyperparameter sweeps across multiple RL algorithms.  
-- Feeding experimental results directly into research publications.  
+- Feeding experimental results directly into a research publication.  
 
 The stack includes **PyTorch** for policies, **Gymnasium** for environments, **Docker** for containerization, and **Nebius AI Studio** for distributed GPU training. Experiments are tracked with **Weights & Biases (W&B)**, and hyperparameters are optimized using **Optuna**.
 
