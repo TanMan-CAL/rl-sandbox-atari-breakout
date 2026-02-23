@@ -27,8 +27,6 @@ Implements RL variants of agents, PPO, A2C, Rainbow DQN, in PyTorch, all inherit
 
 Training infrastructure coordinates Docker containers, GPU provisioning via Nebius, experiment tracking with Weights & Biases, and Optuna-driven hyperparameter search. All models are checkpointed to S3.
 
-An Evaluation Harness executes deterministic rollouts on held-out seeds, producing aggregate statistics and CSV logs.
-
 ---
 
 ## Workflow
@@ -40,7 +38,7 @@ PPO and A2C use shared actor-critic networks with GAE and clipped objectives. Hy
 
 N-step returns get computed at insertion time so sampling stays fast.Single-trial mode for debugging, distributed mode for serious experiments. Off-policy algorithms use centralized replay with async actor-learners. On-policy ones collect rollouts and do mini-batch SGD. Everything logs to W&B continuously.
 
-Each experiment starts with a JSON spec defining the environment, observation wrappers, algorithm, and hyperparameters (or Optuna study config). The orchestrator validates this, creates a W&B run, and if it's distributed, tells Nebius to spin up N worker containers. Workers build environments from the spec with deterministic seeding. For off-policy algorithms, actors push transitions to centralized replay while learners sample batches and update networks. For on-policy, they collect rollouts, compute advantages with GAE, and do several epochs of local SGD. Checkpoints save every N steps and upload to S3. When training finishes, the evaluation harness runs deterministic rollouts on held-out seeds and environment variants.
+Each experiment starts with a JSON spec defining the environment, observation wrappers, algorithm, and hyperparameters (or Optuna study config). The orchestrator validates this, creates a W&B run, and if it's distributed, tells Nebius to spin up N worker containers. Workers build environments from the spec with deterministic seeding. For off-policy algorithms, actors push transitions to centralized replay while learners sample batches and update networks. For on-policy, they collect rollouts, compute advantages with GAE, and do several epochs of local SGD. Checkpoints save every N steps and upload to S3.
 
 ---
 
